@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1090514460095",
+    "project_id": "h20remind",
+    "storage_bucket": "h20remind.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1090514460095:android:ac38eea876df0c6ad0150a",
+        "android_client_info": {
+          "package_name": "com.sayan.h20remind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1090514460095-523qeb34vb5li5daak4al4tvgfskh857.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKaiwsNVVyUe1zv3Uh8sFDr74xxa70cyM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1090514460095-523qeb34vb5li5daak4al4tvgfskh857.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1090514460095-vhj3tv28bbp6u32vb1gf6213hs1q9j0m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sayan.h20remind"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
