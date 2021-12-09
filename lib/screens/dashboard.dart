@@ -13,6 +13,7 @@ late String drankPercent;
 late double goal;
 late double drank;
 late double left;
+late String now_date;
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -21,15 +22,17 @@ class Dashboard extends StatefulWidget {
   _DashboardState createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
   late Timer timer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     drankPercent = "0%";
     goal = 3000;
     drank = 0;
+    now_date = DateFormat('dd-MM-yyyy').format(DateTime.now()).toString();
     left = goal - drank;
     dataMap = {
       "drank": drank,
@@ -38,13 +41,22 @@ class _DashboardState extends State<Dashboard> {
     updatePieChart();
   }
 
+  @override
+  void didChangeAppLifecycleState(final AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        now_date = DateFormat('dd-MM-yyyy').format(DateTime.now()).toString();
+        debugPrint("Date: " + now_date);
+      });
+    }
+  }
+
   void updatePieChart() {
     FirebaseFirestore.instance
         .collection('track')
         .where('user_date',
-            isEqualTo: googleSignIn.currentUser!.email.toString() +
-                "_" +
-                DateFormat('dd-MM-yyyy').format(DateTime.now()).toString())
+            isEqualTo:
+                googleSignIn.currentUser!.email.toString() + "_" + now_date)
         .snapshots()
         .listen((snapshot) {
       double tempTotal = snapshot.docs
@@ -126,9 +138,7 @@ class _DashboardState extends State<Dashboard> {
                           isEqualTo:
                               googleSignIn.currentUser!.email.toString() +
                                   "_" +
-                                  DateFormat('dd-MM-yyyy')
-                                      .format(DateTime.now())
-                                      .toString())
+                                  now_date)
                       .snapshots(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -182,5 +192,11 @@ class _DashboardState extends State<Dashboard> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
+    super.dispose();
   }
 }
