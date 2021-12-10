@@ -75,53 +75,80 @@ class _LoginState extends State<Login> {
   Scaffold signedOutUser() {
     return Scaffold(
       body: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.opacity_outlined,
-              size: 100,
-              color: Colors.lightBlueAccent,
+          width: MediaQuery.of(context).size.width,
+          padding: const EdgeInsets.all(15),
+          child: MediaQuery.of(context).size.width < 600
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    signedOutUserOne(),
+                    signedOutUserTwo(),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    signedOutUserOne(),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    signedOutUserTwo(),
+                  ],
+                )),
+    );
+  }
+
+  Container signedOutUserOne() {
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.opacity_outlined,
+            size: 100,
+            color: Colors.lightBlueAccent,
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          const Text(
+            "h20remind",
+            style: TextStyle(
+              fontFamily: "Poppins",
+              fontWeight: FontWeight.w600,
+              fontSize: 30,
             ),
-            const SizedBox(
-              height: 20,
+          ),
+          Container(
+            alignment: Alignment.center,
+            child: const Text(
+              "Keep track of your water input on all of your devices",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontFamily: "Poppins"),
             ),
-            const Text(
-              "h20remind",
-              style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w600,
-                  fontSize: 30),
-            ),
-            Container(
-              alignment: Alignment.center,
-              child: const Text(
-                "Keep track of your water input on all of your devices",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: "Poppins"),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.only(top: 60),
-              child: ElevatedButton(
-                onPressed: () {
-                  print("Sign in");
-                  login();
-                },
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(
-                    Colors.lightBlueAccent,
-                  ),
-                ),
-                child: const Text(
-                  "Sign in",
-                  style: TextStyle(fontFamily: "Poppins"),
-                ),
-              ),
-            ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container signedOutUserTwo() {
+    return Container(
+      padding: const EdgeInsets.only(top: 60),
+      child: ElevatedButton(
+        onPressed: () {
+          debugPrint("Sign in");
+          login();
+        },
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all(
+            Colors.lightBlueAccent,
+          ),
+        ),
+        child: const Text(
+          "Sign in",
+          style: TextStyle(fontFamily: "Poppins"),
         ),
       ),
     );
