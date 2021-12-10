@@ -90,96 +90,33 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
           scrollDirection: Axis.vertical,
           child: Container(
             margin: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                Card(
-                  elevation: 3,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            child: MediaQuery.of(context).size.width < 600
+                ? Column(
                     children: [
-                      Container(
-                        margin: const EdgeInsets.all(20),
-                        child: PieChart(
-                          initialAngleInDegree: 270,
-                          centerText: drankPercent,
-                          chartValuesOptions: const ChartValuesOptions(
-                            showChartValues: false,
-                          ),
-                          dataMap: dataMap,
-                          chartType: ChartType.ring,
-                          colorList: const [
-                            Colors.lightBlueAccent,
-                            Colors.grey,
-                          ],
-                          chartRadius: 100,
-                          legendOptions: const LegendOptions(
-                            showLegends: false,
-                          ),
-                        ),
+                      statisticCard(),
+                      const SizedBox(
+                        height: 20,
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Goal: $goal ml"),
-                          Text("Drank: $drank ml"),
-                          Text("Left: $left ml"),
-                        ],
+                      waterLog(),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width / 2) - 10,
+                        child: statisticCard(),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      SizedBox(
+                        width: (MediaQuery.of(context).size.width / 2) - 10,
+                        child: waterLog(),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection("track")
-                      .where('user_date',
-                          isEqualTo:
-                              googleSignIn.currentUser!.email.toString() +
-                                  "_" +
-                                  now_date)
-                      .snapshots(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return const Center(
-                        child: Text("Something went wrong"),
-                      );
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (snapshot.data!.docs.isEmpty) {
-                      return const Center(
-                        child: Text("Drink some water"),
-                      );
-                    }
-                    if (snapshot.hasData) {
-                      return ListView(
-                        physics: const ScrollPhysics(),
-                        shrinkWrap: true,
-                        children:
-                            snapshot.data!.docs.map((DocumentSnapshot ds) {
-                          Map<String, dynamic> data =
-                              ds.data() as Map<String, dynamic>;
-                          return ListTile(
-                              title: Text(data['drank'] + " ml"),
-                              subtitle: Text(data['date'] + " " + data['time']),
-                              trailing: const Icon(
-                                Icons.opacity,
-                                color: Colors.lightBlueAccent,
-                              ));
-                        }).toList(),
-                      );
-                    }
-                    return Container();
-                  },
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -191,6 +128,90 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Card statisticCard() {
+    return Card(
+      elevation: 3,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(
+            margin: const EdgeInsets.all(20),
+            child: PieChart(
+              initialAngleInDegree: 270,
+              centerText: drankPercent,
+              chartValuesOptions: const ChartValuesOptions(
+                showChartValues: false,
+              ),
+              dataMap: dataMap,
+              chartType: ChartType.ring,
+              colorList: const [
+                Colors.lightBlueAccent,
+                Colors.grey,
+              ],
+              chartRadius: 100,
+              legendOptions: const LegendOptions(
+                showLegends: false,
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Goal: $goal ml"),
+              Text("Drank: $drank ml"),
+              Text("Left: $left ml"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  StreamBuilder<QuerySnapshot> waterLog() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("track")
+          .where('user_date',
+              isEqualTo:
+                  googleSignIn.currentUser!.email.toString() + "_" + now_date)
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text("Something went wrong"),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text("Drink some water"),
+          );
+        }
+        if (snapshot.hasData) {
+          return ListView(
+            physics: const ScrollPhysics(),
+            shrinkWrap: true,
+            children: snapshot.data!.docs.map((DocumentSnapshot ds) {
+              Map<String, dynamic> data = ds.data() as Map<String, dynamic>;
+              return ListTile(
+                  title: Text(data['drank'] + " ml"),
+                  subtitle: Text(data['date'] + " " + data['time']),
+                  trailing: const Icon(
+                    Icons.opacity,
+                    color: Colors.lightBlueAccent,
+                  ));
+            }).toList(),
+          );
+        }
+        return Container();
+      },
     );
   }
 
