@@ -53,10 +53,8 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
 
   void updatePieChart() {
     FirebaseFirestore.instance
-        .collection('track')
-        .where('user_date',
-            isEqualTo:
-                googleSignIn.currentUser!.email.toString() + "_" + now_date)
+        .collection(googleSignIn.currentUser!.email.toString())
+        .where('date', isEqualTo: now_date)
         .snapshots()
         .listen((snapshot) {
       double tempTotal = snapshot.docs
@@ -173,10 +171,8 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
   StreamBuilder<QuerySnapshot> waterLog() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection("track")
-          .where('user_date',
-              isEqualTo:
-                  googleSignIn.currentUser!.email.toString() + "_" + now_date)
+          .collection(googleSignIn.currentUser!.email.toString())
+          .where('date', isEqualTo: now_date)
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) {

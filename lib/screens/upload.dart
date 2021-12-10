@@ -4,7 +4,8 @@ import 'package:h20remind/screens/dashboard.dart';
 import 'package:h20remind/screens/login.dart';
 import 'package:intl/intl.dart';
 
-final drinkRef = FirebaseFirestore.instance.collection('track');
+final drinkRef = FirebaseFirestore.instance
+    .collection(googleSignIn.currentUser!.email.toString());
 
 class Upload extends StatefulWidget {
   Upload({Key? key}) : super(key: key);
@@ -81,10 +82,6 @@ class _UploadState extends State<Upload> {
         "drank": quantity,
         "time": DateFormat('jm').format(DateTime.now()).toString(),
         "date": DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
-        "user": googleSignIn.currentUser!.email.toString(),
-        "user_date": googleSignIn.currentUser!.email.toString() +
-            "_" +
-            DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
       });
       Navigator.pushAndRemoveUntil(
           context,
