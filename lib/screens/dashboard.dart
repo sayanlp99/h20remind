@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:h20remind/screens/login.dart';
 import 'package:h20remind/screens/upload.dart';
 import 'package:h20remind/widgets/h20remind_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:locally/locally.dart';
 
 late Map<String, double> dataMap;
 late String drankPercent;
@@ -39,6 +41,15 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
       "notdrank": left,
     };
     updatePieChart();
+    Locally(
+      context: context,
+      payload: 'test',
+      pageRoute: MaterialPageRoute(builder: (context) => const Dashboard()),
+      appIcon: 'mipmap/notif',
+    ).showPeriodically(
+        title: "title.text",
+        message: "message.text",
+        repeatInterval: RepeatInterval.hourly);
   }
 
   @override
