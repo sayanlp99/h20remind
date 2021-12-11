@@ -47,8 +47,8 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
       pageRoute: MaterialPageRoute(builder: (context) => const Dashboard()),
       appIcon: 'mipmap/notif',
     ).showPeriodically(
-        title: "title.text",
-        message: "message.text",
+        title: "h20remind",
+        message: "HEY! Drink some water",
         repeatInterval: RepeatInterval.hourly);
   }
 
