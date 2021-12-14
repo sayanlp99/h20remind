@@ -41,12 +41,17 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
       "notdrank": left,
     };
     updatePieChart();
-    Locally(
+    Locally locally = Locally(
       context: context,
       payload: 'test',
       pageRoute: MaterialPageRoute(builder: (context) => const Dashboard()),
       appIcon: 'mipmap/notif',
-    ).showPeriodically(
+      iosRequestAlertPermission: true,
+      iosRequestBadgePermission: true,
+      iosRequestSoundPermission: true,
+    );
+    locally.requestPermission();
+    locally.showPeriodically(
         title: "h20remind",
         message: "HEY! Drink some water",
         repeatInterval: RepeatInterval.hourly);
