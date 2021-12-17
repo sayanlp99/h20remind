@@ -75,26 +75,27 @@ class _LoginState extends State<Login> {
   Scaffold signedOutUser() {
     return Scaffold(
       body: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.all(15),
-          child: MediaQuery.of(context).size.width < 600
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    signedOutUserOne(),
-                    signedOutUserTwo(),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    signedOutUserOne(),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    signedOutUserTwo(),
-                  ],
-                )),
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.all(15),
+        child: MediaQuery.of(context).size.width < 600
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  signedOutUserOne(),
+                  signedOutUserTwo(),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  signedOutUserOne(),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  signedOutUserTwo(),
+                ],
+              ),
+      ),
     );
   }
 
