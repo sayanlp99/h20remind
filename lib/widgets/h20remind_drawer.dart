@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:h20remind/screens/login.dart';
+import 'package:h20remind/screens/report.dart';
 import 'package:h20remind/screens/settings.dart';
 
 Drawer h20remindDrawer(context) {
@@ -63,6 +64,21 @@ Drawer h20remindDrawer(context) {
           onTap: () {
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => const Settings()));
+          },
+        ),
+        ListTile(
+          title: Row(
+            children: const [
+              Icon(Icons.assessment),
+              SizedBox(
+                width: 25,
+              ),
+              Text('Report')
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Report()));
           },
         ),
         ListTile(
