@@ -10,12 +10,16 @@ import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:locally/locally.dart';
 
-late Map<String, double> dataMap;
-late String drankPercent;
-late double goal;
-late double drank;
-late double left;
-late String now_date;
+late Map<String, double> dataMap = {
+  "drank": 0,
+  "notdrank": 0,
+};
+late String drankPercent = '';
+late double goal = 0.0;
+late double drank = 0.0;
+late double left = 0.0;
+late String now_date = '';
+bool customGoal = false;
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -31,35 +35,64 @@ class _DashboardState extends State<Dashboard> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-    drankPercent = "0%";
-    goal = 3000;
-    drank = 0;
-    now_date = DateFormat('dd-MM-yyyy').format(DateTime.now()).toString();
-    left = goal - drank;
-    dataMap = {
-      "drank": drank,
-      "notdrank": left,
-    };
-    updatePieChart();
-    Locally locally = Locally(
-      context: context,
-      payload: 'test',
-      pageRoute: MaterialPageRoute(builder: (context) => const Dashboard()),
-      appIcon: 'mipmap/notif',
-      iosRequestAlertPermission: true,
-      iosRequestBadgePermission: true,
-      iosRequestSoundPermission: true,
-    );
-    locally.requestPermission();
-    locally.showPeriodically(
-        title: "h20remind",
-        message: "HEY! Drink some water",
-        repeatInterval: RepeatInterval.hourly);
+    getGoalFromFirestore();
+    Future.delayed(const Duration(seconds: 2), () {
+      drankPercent = "0%";
+      if (!customGoal) {
+        goal = 3000;
+      }
+      drank = 0;
+      now_date = DateFormat('dd-MM-yyyy').format(DateTime.now()).toString();
+      left = goal - drank;
+      dataMap = {
+        "drank": drank,
+        "notdrank": left,
+      };
+      updatePieChart();
+      Locally locally = Locally(
+        context: context,
+        payload: 'test',
+        pageRoute: MaterialPageRoute(builder: (context) => const Dashboard()),
+        appIcon: 'mipmap/notif',
+        iosRequestAlertPermission: true,
+        iosRequestBadgePermission: true,
+        iosRequestSoundPermission: true,
+      );
+      locally.requestPermission();
+      locally.showPeriodically(
+          title: "h20remind",
+          message: "HEY! Drink some water",
+          repeatInterval: RepeatInterval.hourly);
+    });
+  }
+
+  void getGoalFromFirestore() {
+    FirebaseFirestore.instance
+        .collection(googleSignIn.currentUser!.email.toString())
+        .doc("goal")
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists) {
+        debugPrint('Document data: ${documentSnapshot.data()}');
+        Map<String, dynamic> data =
+            documentSnapshot.data()! as Map<String, dynamic>;
+        setState(() {
+          goal = double.parse(data['goal']);
+          customGoal = true;
+        });
+      } else {
+        debugPrint('Document does not exist on the database');
+        setState(() {
+          customGoal = false;
+        });
+      }
+    });
   }
 
   @override
   void didChangeAppLifecycleState(final AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      getGoalFromFirestore();
       setState(() {
         now_date = DateFormat('dd-MM-yyyy').format(DateTime.now()).toString();
         debugPrint("Date: " + now_date);
