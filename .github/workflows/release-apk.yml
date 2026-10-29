@@ -1,0 +1,99 @@
+name: Release APK
+
+# Run manually from Actions → Release APK → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. v2.0.0). Leave empty to use the version in pubspec.yaml.
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # An existing tag is built as-is; a new tag is created from the branch
+      # the workflow was run on.
+      - name: Resolve tag
+        id: tag
+        run: |
+          tag="${{ inputs.tag }}"
+          if [ -z "$tag" ]; then
+            version=$(grep -E '^version:' pubspec.yaml | awk '{print $2}')
+            tag="v${version%%+*}"
+          fi
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            git checkout -q "$tag"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Building $tag"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Optional: sign with a real key so each release installs over the last.
+      # Without these secrets the APKs are signed with a throwaway debug key.
+      - name: Set up release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set; signing with a debug key."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+          cat > android/key.properties <<EOF
+          storeFile=release.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      - name: Build split APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Rename APKs
+        run: |
+          mkdir -p release
+          for apk in build/app/outputs/flutter-apk/app-*-release.apk; do
+            abi=$(basename "$apk" | sed -E 's/^app-(.*)-release\.apk$/\1/')
+            cp "$apk" "release/h20remind-${{ steps.tag.outputs.tag }}-$abi.apk"
+          done
+          (cd release && sha256sum *.apk > SHA256SUMS.txt)
+          ls -l release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: h20remind-${{ steps.tag.outputs.tag }}-apks
+          path: release/
+
+      - name: Upload to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --target "$(git rev-parse HEAD)" \
+              --title "h20remind ${TAG#v}" --generate-notes
+          fi
+          gh release upload "$TAG" release/* --clobber
