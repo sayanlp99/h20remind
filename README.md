@@ -1,12 +1,56 @@
 # h20remind
 
-A new Flutter project to keep track on water intake.
+Track how much water you drink, see your progress against a daily goal, and
+get gentle hourly reminders. Runs on Android, iOS and the web, with data synced
+through Firebase.
 
-Features:<br/>
-• Cross Platform Application, works on Web, Android and iOS.<br/>
-• Use Firebase authentication for user authentication and session management.<br/>
-• Firebase Firestore is used to store all the data.<br/>
+## Features
 
-| Android        | iOS           | Windows           |
-| :-------------: | :-------------: | :-------------: |
-| ![Screenshot_1639493299_750x1334](https://user-images.githubusercontent.com/28763093/146022646-12967431-3815-4cb3-b623-871cffd1ab09.png) | ![Screenshot 2021-12-14 at 8 19 10 PM](https://user-images.githubusercontent.com/28763093/146021495-8c2977c2-626a-4ecd-8587-9aaf506f9244.png) | ![Image 1](https://user-images.githubusercontent.com/28763093/146019680-d92f087b-d814-436d-8d6a-b7466fc9e01d.png) |
+- **Today** – progress ring, one-tap quick add, custom amounts, swipe to delete
+  with undo.
+- **History** – seven-day chart, daily average, goal streak and a 30-day log.
+- **Settings** – daily goal and hourly reminders (Android and iOS).
+- Material 3 design with light and dark themes and adaptive layouts for phones,
+  tablets and desktop browsers.
+
+## Getting started
+
+Requires Flutter 3.47 or newer.
+
+```sh
+flutter pub get
+flutter run
+```
+
+Firebase requirements (one-time, in the Firebase console):
+
+- **Authentication → Sign-in method → Google** must be enabled.
+- Android: add the SHA-1 of your signing key to the Android app.
+- Deploy the security rules with `firebase deploy --only firestore:rules`.
+
+## Architecture
+
+```
+lib/
+  core/          Theme, breakpoints, date and number helpers
+  domain/        Models, repository interfaces, pure business logic
+  data/          Firebase Auth, Firestore and local-notification implementations
+  presentation/  Screens, widgets and ChangeNotifier controllers (provider)
+```
+
+- Presentation depends only on the interfaces in `domain/`. Concrete Firebase
+  implementations are wired up in `main.dart`, so tests run against in-memory
+  fakes.
+- Data for a user is scoped by `UserScope`, which rebuilds all repositories and
+  controllers when the signed-in account changes.
+- History aggregation runs on a background isolate (`compute`) once a snapshot
+  is large enough to risk dropping frames.
+- The Firestore schema is unchanged from v1, so existing data keeps working.
+
+## Checks
+
+```sh
+dart format lib test
+flutter analyze
+flutter test
+```

@@ -1,26 +1,29 @@
-import 'package:flutter/material.dart';
-import 'package:h20remind/screens/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import 'app.dart';
+import 'data/auth/firebase_auth_repository.dart';
+import 'data/firestore/firestore_user_repositories.dart';
+import 'data/health/health_connect_sync.dart';
+import 'data/notifications/local_notification_reminder_scheduler.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const MyApp());
-}
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'h20remind',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+  final firestore = FirebaseFirestore.instance;
+  runApp(
+    H20RemindApp(
+      authRepository: FirebaseAuthRepository(FirebaseAuth.instance),
+      reminderScheduler: LocalNotificationReminderScheduler(
+        FlutterLocalNotificationsPlugin(),
       ),
-      home: const Login(),
-    );
-  }
+      healthSync: HealthConnectSync(),
+      userRepositories: (user) => firestoreUserRepositories(firestore, user),
+    ),
+  );
 }
